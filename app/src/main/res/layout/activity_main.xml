@@ -12,7 +12,7 @@
         android:id="@+id/stop_watch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="00:00:00"
+        android:text="00:00:000"
         android:gravity="center"/>
 
     <LinearLayout

@@ -3,9 +3,7 @@ package com.example.opictest
 import android.Manifest
 import android.content.Intent
 import android.graphics.Color
-import android.os.Bundle
-import android.os.Environment
-import android.util.Log
+import android.os.*
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -17,6 +15,28 @@ import java.io.*
 class MainActivity : AppCompatActivity() {
     private val list:ArrayList<TextCard> = ArrayList()
     private var layout:LinearLayout? = null
+
+    //멤버변수화
+    private var timer: TextView? = null
+
+    //상태를 표시하는 '상수' 지정
+    //- 각각의 숫자는 독립적인 개별 '상태' 의미
+    private val INIT = 0 //처음
+    private val RUN = 1 //실행중
+    private val PAUSE = 2 //정지
+
+
+    //상태값을 저장하는 변수
+    //- INIT은 초기값임, 그걸 status 안에 넣는다.(0을 넣은거다)
+    var status = INIT
+
+    //기록할때 순서 체크를 위한 변수
+    private val cnt = 1
+
+    //타이머 시간 값을 저장할 변수
+    private var baseTime: Long = 0 //타이머 시간 값을 저장할 변수
+    private var pauseTime: Long = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -25,6 +45,8 @@ class MainActivity : AppCompatActivity() {
 
         layout = findViewById(R.id.root)
         inputFromExternal()
+
+        timer = findViewById(R.id.stop_watch)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -78,8 +100,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onClickClear(view: View) {
+        staButton();
+
         for (textCard in list) {
             textCard.hide()
+        }
+    }
+
+    private fun staButton() {
+        baseTime = SystemClock.elapsedRealtime()
+        handler.sendEmptyMessage(0)
+    }
+
+    private fun getTime(): String? {
+        //경과된 시간 체크
+        val nowTime = SystemClock.elapsedRealtime()
+        //시스템이 부팅된 이후의 시간?
+        val overTime = nowTime - baseTime
+        val m = overTime / 1000 / 60
+        val s = overTime / 1000 % 60
+        val ms = overTime % 1000
+        return String.format("%02d:%02d:%03d", m, s, ms)
+    }
+
+    var handler: Handler = object : Handler() {
+        override fun handleMessage(msg: Message) {
+            timer?.text = getTime()
+            this.sendEmptyMessage(0)
         }
     }
 
